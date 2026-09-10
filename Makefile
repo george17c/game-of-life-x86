@@ -1,13 +1,13 @@
-FILE = boot
+SEED ?= gun
 
 .PHONY:
 	build run clean
 
-build:
-	nasm -f bin -o $(FILE).bin $(FILE).asm
+build: boot.asm
+	nasm -f bin -o boot.bin boot.asm -DSEED_FILE='"./patterns/$(SEED).inc"'
 
-run:
-	qemu-system-x86_64 -drive format=raw,file=$(FILE).bin
+run: boot.bin
+	qemu-system-x86_64 -drive format=raw,file=boot.bin
 
 clean:
-	rm -f $(FILE).bin
+	rm -f boot.bin
