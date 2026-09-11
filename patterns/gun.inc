@@ -1,5 +1,6 @@
 .seed_data:
     ; Gosper's glider gun
+    ; https://commons.wikimedia.org/wiki/File:Gosper%27s_glider_gun.ogv
     db 1,4,2,4,1,5,2,5
     db 35,3,36,3,35,4,36,4
     db 13,2,14,2,12,3,16,3,11,4,17,4,11,5,15,5,17,5,18,5,11,6,17,6,12,7,16,7,13,8,14,8
