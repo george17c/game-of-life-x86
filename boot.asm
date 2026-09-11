@@ -5,7 +5,7 @@
     jmp 0x0000:start
 
 start:
-    ; set Video Mode 13h (320x200 256 colors)
+    ; set Video Mode 13h
     mov ax, 0x0013
     int 0x10
 
@@ -27,8 +27,8 @@ start:
     rep stosw       ; write ax to es:di and increment di by 2 (word), cx times
 
     ; 256x128 arrays, 1 byte per cell
-    xor bp, bp        ; bp will be buffer A at ds:0x0000
-    mov di, 0x8000    ; di will be buffer B at ds:0x8000
+    xor bp, bp      ; bp will be buffer A (current frame) at ds:0x0000
+    mov di, 0x8000  ; di will be buffer B (next frame)    at ds:0x8000
 
     mov si, .seed_data
 .seed_loop:
@@ -41,7 +41,7 @@ start:
     ; and each row in my array is 256 bytes long
     ; ex: x = 15, y = 4
     ; => bx = 0x040F = 4 * 16^2 + 15
-    ;          = 4 * 256  + 15
+    ;                = 4 * 256  + 15
     ; so [ds:bx] correctly selects the position in the buffer
     mov byte [ds:bx], 1
     add si, 2
@@ -120,8 +120,9 @@ start:
     test al, al
     jz .next_x
 
-    ; render white pixel
-    push di
+    ; VGA resolution is 320x200, a frame's resolution is 256x128,
+    ; so we need margins to display it centered.
+    ; render white pixel:
     mov bx, dx
     add bx, 36      ; y + 36, vertical margin
     mov ax, bx
@@ -131,7 +132,6 @@ start:
     add bx, cx
     add bx, 32      ; x + 32, horizontal margin
     mov byte [es:bx], 0x000F
-    pop di
 
 .next_x:
     inc cx
