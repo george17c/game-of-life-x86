@@ -14,19 +14,16 @@ start:
     mov sp, 0x7C00
 
     mov ax, 0x07E0
-    mov ds, ax  ; set data segment *after* our 512 byte region
-                ; since nothing's there and we need space for
-                ; double buffering
+    mov ds, ax      ; set data segment *after* our 512 byte region
 
-    ; initialize buffers
+    ; initialize buffers (fill the 64kb zone after the MBR with 0s)
     mov es, ax      ; start of data segment
-    xor di, di      ; index in buffer memory
-    mov cx, 32768   ; both buffers are 32768 words (or 65536 bytes) long in total 
+    xor di, di      ; index
+    mov cx, 32768   ; counter
     xor ax, ax      ; 0x0000
     cld             ; clear direction flag so di is incremented
     rep stosw       ; write ax to es:di and increment di by 2 (word), cx times
 
-    ; 256x128 arrays, 1 byte per cell
     xor bp, bp      ; bp will be buffer A (current frame) at ds:0x0000
     mov di, 0x8000  ; di will be buffer B (next frame)    at ds:0x8000
 
@@ -37,8 +34,8 @@ start:
     cmp bx, 0xFFFF      ; end of seed_data
     je .seed_done
 
-    ; this trick works because as bh is incremented by 1, bx grows by 256
-    ; and each row in my array is 256 bytes long
+    ; this addressing trick works because as bh is incremented by 1,
+    ; bx grows by 256 and each row in my array is 256 bytes long
     ; ex: x = 15, y = 4
     ; => bx = 0x040F = 4 * 16^2 + 15
     ;                = 4 * 256  + 15
@@ -101,11 +98,11 @@ start:
     add bx, bp
     mov al, [ds:bx]
 
-    ; 9-cell rule evaluation
+    ; simplified simulation logic
     cmp si, 3
     je .alive
     cmp si, 4
-    je .store    ; keeps current state
+    je .store
 .dead:
     xor al, al
     jmp .store
